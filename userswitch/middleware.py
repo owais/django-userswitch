@@ -54,7 +54,7 @@ class UserSwitchMiddleware(object):
             # It is not a bug, it is intentional. If the user does not exist in the DB,
             # it is a good idea to show that than to have the developer wondering why
             # the user is not switching.
-            user = User.objects.get(username=username)
+            user = User.objects.get(pk=username)
 
             # user.backend is needed for the the auth.login to work properly
             user.backend = self.USERSWITCH_OPTIONS['auth_backend']
@@ -84,12 +84,12 @@ class UserSwitchMiddleware(object):
                     users = User.objects.all()
 
                 for user in users:
-                    options_html += '<option value="%s">%s</option>' % (user, user)
+                    options_html += u'<option value="%s">%s</option>' % (user.pk, user)
 
                 switch_widget = self.USERSWITCH_WIDGET.replace('<options>',options_html)
                 if self.USERSWITCH_OPTIONS['replace_text']:
                     response.content = response.content.replace(self.USERSWITCH_OPTIONS['replace_text'], switch_widget)
                 else:
-                    response.content = response.content.replace('</body>','%s</body>' % switch_widget)
+                    response.content = response.content.replace('</body>','{}</body>'.format(switch_widget.encode('utf8')))
 
         return response
